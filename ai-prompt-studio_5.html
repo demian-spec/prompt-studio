@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Prompt Studio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg-0: #080810;
+  --bg-1: #0f0f1a;
+  --bg-2: #161622;
+  --bg-3: #1e1e2e;
+  --bg-4: #26263a;
+  --bg-5: #2e2e46;
+  --border: rgba(255,255,255,0.06);
+  --border-md: rgba(255,255,255,0.1);
+  --border-hi: rgba(255,255,255,0.18);
+  --text-0: #f2f2fa;
+  --text-1: #9090b0;
+  --text-2: #50507a;
+  --accent: #a78bfa;
+  --accent-f: rgba(167,139,250,0.14);
+  --accent-f2: rgba(167,139,250,0.22);
+  --green: #34d399;
+  --green-f: rgba(52,211,153,0.13);
+  --blue: #60a5fa;
+  --blue-f: rgba(96,165,250,0.13);
+  --yellow: #fbbf24;
+  --yellow-f: rgba(251,191,36,0.13);
+  --pink: #f472b6;
+  --pink-f: rgba(244,114,182,0.13);
+  --red: #f87171;
+  --radius: 10px;
+  --radius-sm: 7px;
+  --radius-xs: 5px;
+}
+
+/* ── DAY MODE ── */
+body.day {
+  --bg-0: #f5f5f8;
+  --bg-1: #ffffff;
+  --bg-2: #f0f0f5;
+  --bg-3: #e8e8f0;
+  --bg-4: #dcdce8;
+  --bg-5: #d0d0e0;
+  --border: rgba(0,0,0,0.07);
+  --border-md: rgba(0,0,0,0.12);
+  --border-hi: rgba(0,0,0,0.22);
+  --text-0: #1a1a2e;
+  --text-1: #4a4a6a;
+  --text-2: #8888aa;
+  --accent: #7c5cdc;
+  --accent-f: rgba(124,92,220,0.10);
+  --accent-f2: rgba(124,92,220,0.18);
+  --green: #059669;
+  --green-f: rgba(5,150,105,0.10);
+  --blue: #2563eb;
+  --blue-f: rgba(37,99,235,0.10);
+  --yellow: #d97706;
+  --yellow-f: rgba(217,119,6,0.10);
+  --pink: #db2777;
+  --pink-f: rgba(219,39,119,0.10);
+  --red: #dc2626;
+}
+
+/* ── THEME TOGGLE ── */
+.theme-toggle {
+  display: flex; align-items: center; gap: 3px;
+  background: var(--bg-3); border: 1px solid var(--border-md);
+  border-radius: 20px; padding: 3px; margin: 10px 8px 6px;
+  flex-shrink: 0;
+}
+.theme-btn {
+  flex: 1; padding: 4px 0; border: none; border-radius: 16px;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; font-family: inherit;
+  background: transparent; color: var(--text-2);
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+.theme-btn.active {
+  background: var(--bg-1); color: var(--text-0);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+body.day .theme-btn.active { box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
+
+/* ── STYLE MATRIX ── */
+.matrix-panel {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; margin-bottom: 0;
+}
+.matrix-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: var(--bg-3); border-bottom: 1px solid var(--border);
+}
+.matrix-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2); }
+.matrix-hint { font-size: 10px; color: var(--text-2); }
+.matrix-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px; padding: 12px;
+}
+.mx-card {
+  background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 11px 12px;
+  transition: all 0.15s; cursor: default;
+}
+.mx-card:hover { border-color: var(--border-hi); background: var(--bg-4); }
+.mx-top { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+.mx-icon { font-size: 16px; }
+.mx-name { font-size: 12px; font-weight: 700; color: var(--text-0); }
+.mx-desc { font-size: 10px; color: var(--text-2); margin-bottom: 7px; }
+.mx-mod { font-size: 10.5px; color: var(--text-1); line-height: 1.5; margin-bottom: 8px; background: var(--bg-2); border-radius: var(--radius-xs); padding: 6px 8px; }
+.mx-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+.mx-copy-btn {
+  padding: 4px 10px; border-radius: var(--radius-xs); font-size: 10.5px; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--border-md); background: var(--bg-4);
+  color: var(--text-1); transition: all 0.13s; font-family: inherit;
+}
+.mx-copy-btn:hover { color: var(--text-0); border-color: var(--border-hi); }
+.mx-copy-btn.mj { border-color: rgba(96,165,250,0.4); color: var(--blue); background: var(--blue-f); }
+.mx-copy-btn.kling { border-color: rgba(52,211,153,0.4); color: var(--green); background: var(--green-f); }
+.mx-copy-btn.mj:hover { background: rgba(96,165,250,0.2); }
+.mx-copy-btn.kling:hover { background: rgba(52,211,153,0.2); }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg-0); color: var(--text-0); font-family: 'Inter', sans-serif; font-size: 13px; line-height: 1.5; overflow: hidden; }
+
+/* ── APP SHELL ── */
+.app { display: flex; height: 100vh; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 210px; min-width: 210px;
+  background: var(--bg-1);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.sidebar-logo {
+  padding: 16px 14px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar-logo h1 { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-0); }
+.sidebar-logo p { font-size: 10px; color: var(--text-2); margin-top: 2px; }
+
+.proj-label {
+  padding: 10px 14px 6px;
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-2);
+}
+.proj-list { flex: 1; overflow-y: auto; padding: 0 6px; }
+.proj-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 8px; border-radius: var(--radius-sm);
+  cursor: pointer; color: var(--text-1); font-size: 12px;
+  transition: all 0.13s; margin-bottom: 1px; position: relative;
+}
+.proj-item:hover { background: var(--bg-3); color: var(--text-0); }
+.proj-item.active { background: var(--bg-4); color: var(--text-0); }
+.proj-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-2); flex-shrink: 0; }
+.proj-item.active .proj-dot { background: var(--accent); }
+.proj-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proj-del { display: none; position: absolute; right: 6px; background: none; border: none; color: var(--red); font-size: 15px; cursor: pointer; padding: 2px 4px; border-radius: 3px; line-height: 1; }
+.proj-item:hover .proj-del { display: block; }
+.proj-del:hover { background: rgba(248,113,113,0.1); }
+
+.new-proj-btn {
+  margin: 6px; padding: 7px 10px;
+  background: none; border: 1px dashed var(--border-md);
+  border-radius: var(--radius-sm); color: var(--text-1);
+  font-size: 11.5px; cursor: pointer; width: calc(100% - 12px);
+  text-align: left; transition: all 0.13s;
+  display: flex; align-items: center; gap: 6px;
+}
+.new-proj-btn:hover { background: var(--bg-3); color: var(--text-0); border-color: var(--border-hi); }
+
+.api-box {
+  padding: 10px 10px 12px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.api-lbl { font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2); margin-bottom: 5px; }
+.api-row { display: flex; gap: 4px; }
+.api-inp {
+  flex: 1; background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: var(--radius-xs); padding: 5px 7px;
+  color: var(--text-0); font-size: 10.5px; font-family: 'JetBrains Mono', monospace;
+  outline: none; min-width: 0;
+}
+.api-inp:focus { border-color: var(--accent); }
+.api-save {
+  padding: 5px 8px; background: var(--accent-f); border: 1px solid var(--accent);
+  border-radius: var(--radius-xs); color: var(--accent); font-size: 10px;
+  font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.13s;
+}
+.api-save:hover { background: var(--accent-f2); }
+.api-st { font-size: 10px; margin-top: 4px; }
+.api-st.ok { color: var(--green); }
+.api-st.no { color: var(--text-2); }
+
+/* ── MAIN ── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+/* ── EMPTY STATE ── */
+.empty-wrap { flex: 1; display: flex; align-items: center; justify-content: center; }
+.empty-box { text-align: center; color: var(--text-2); }
+.empty-box .icon { font-size: 44px; margin-bottom: 14px; opacity: 0.5; }
+.empty-box h2 { font-size: 15px; color: var(--text-1); margin-bottom: 6px; }
+.empty-box p { font-size: 12px; line-height: 1.7; }
+
+/* ── WORKSPACE ── */
+.workspace { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── TOP BAR: IMAGE / VIDEO CATEGORY ── */
+.cat-bar {
+  display: flex; align-items: center; gap: 0;
+  padding: 14px 20px 0;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.cat-tab {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 20px 11px; cursor: pointer;
+  font-size: 13px; font-weight: 600; color: var(--text-1);
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s; position: relative; top: 1px;
+}
+.cat-tab:hover { color: var(--text-0); }
+.cat-tab.active { color: var(--text-0); border-bottom-color: var(--accent); }
+.cat-tab .cat-icon { font-size: 15px; }
+
+/* ── SCROLL CONTENT ── */
+.content { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+/* ── CONTROL ROW (tool, ratio, quality, count, generate) ── */
+.ctrl-bar {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.ctrl-label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2); margin-bottom: 4px; }
+
+.ctrl-group { display: flex; flex-direction: column; gap: 0; }
+.ctrl-group.fill { flex: 1; min-width: 0; }
+.ctrl-divider { width: 1px; height: 36px; background: var(--border); flex-shrink: 0; }
+
+/* PILL SELECTOR */
+.pill-row { display: flex; gap: 4px; flex-wrap: wrap; }
+.pill {
+  padding: 4px 10px; border-radius: 20px; font-size: 11.5px; font-weight: 500;
+  cursor: pointer; transition: all 0.13s;
+  border: 1px solid var(--border-md); background: var(--bg-3); color: var(--text-1);
+  white-space: nowrap;
+}
+.pill:hover { border-color: var(--border-hi); color: var(--text-0); }
+.pill.active { background: var(--accent-f); border-color: var(--accent); color: var(--accent); }
+.pill.active-green { background: var(--green-f); border-color: var(--green); color: var(--green); }
+.pill.active-blue { background: var(--blue-f); border-color: var(--blue); color: var(--blue); }
+.pill.active-yellow { background: var(--yellow-f); border-color: var(--yellow); color: var(--yellow); }
+
+/* COUNT STEPPER */
+.stepper { display: flex; align-items: center; gap: 0; border: 1px solid var(--border-md); border-radius: 20px; overflow: hidden; background: var(--bg-3); }
+.step-btn { padding: 4px 10px; background: none; border: none; color: var(--text-0); font-size: 16px; cursor: pointer; line-height: 1; transition: background 0.13s; }
+.step-btn:hover { background: var(--bg-5); }
+.step-btn:disabled { color: var(--text-2); cursor: not-allowed; }
+.step-val { font-size: 13px; font-weight: 600; min-width: 24px; text-align: center; color: var(--text-0); }
+
+/* GENERATE BTN */
+.gen-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 20px; border-radius: 8px;
+  background: var(--accent); border: none; color: #fff;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: all 0.15s; flex-shrink: 0; white-space: nowrap;
+  box-shadow: 0 0 20px rgba(167,139,250,0.25);
+  font-family: inherit;
+}
+.gen-btn:hover { background: #b89ffe; box-shadow: 0 0 28px rgba(167,139,250,0.4); }
+.gen-btn:disabled { background: var(--bg-5); color: var(--text-2); cursor: not-allowed; box-shadow: none; }
+.gen-btn .spark { font-size: 15px; }
+
+/* ── PHRASES PANEL ── */
+.panel {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px;
+}
+.panel-hd {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.panel-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2); }
+.chip-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px; font-size: 11.5px;
+  cursor: pointer; transition: all 0.13s;
+  border: 1px solid var(--border); background: var(--bg-3); color: var(--text-1);
+  user-select: none; max-width: 260px;
+}
+.chip .chip-txt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip.sel { background: var(--accent-f); border-color: var(--accent); color: var(--accent); }
+.chip .chip-x { color: var(--text-2); font-size: 14px; line-height: 1; flex-shrink: 0; }
+.chip:hover .chip-x { color: var(--red); }
+.add-chip-row { display: flex; gap: 6px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.add-inp {
+  flex: 1; background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: var(--radius-xs); padding: 6px 9px;
+  color: var(--text-0); font-size: 12.5px; outline: none; font-family: inherit;
+}
+.add-inp:focus { border-color: var(--border-hi); }
+.add-chip-btn {
+  padding: 6px 12px; border: 1px solid var(--border-hi); border-radius: var(--radius-xs);
+  background: var(--bg-4); color: var(--text-0); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all 0.13s; white-space: nowrap; font-family: inherit;
+}
+.add-chip-btn:hover { background: var(--bg-5); }
+
+/* ── PROMPT TEXTAREA ── */
+.prompt-wrap {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.prompt-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px 0;
+}
+.prompt-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2); }
+.prompt-hint { font-size: 10px; color: var(--text-2); }
+.prompt-ta {
+  width: 100%; min-height: 100px; background: transparent; border: none;
+  padding: 8px 14px 12px; color: var(--text-0); font-size: 13.5px;
+  font-family: inherit; outline: none; resize: vertical; line-height: 1.65;
+}
+.prompt-ta::placeholder { color: var(--text-2); }
+
+/* ── IMAGE UPLOAD AREA ── */
+.img-drop {
+  border: 1.5px dashed var(--border-md); border-radius: var(--radius);
+  padding: 18px; text-align: center; cursor: pointer;
+  transition: all 0.15s; color: var(--text-2); font-size: 12px;
+  background: var(--bg-2);
+}
+.img-drop:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-f); }
+.img-drop input { display: none; }
+.img-drop .di { font-size: 28px; margin-bottom: 6px; }
+.img-previews { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.img-thumb {
+  position: relative; width: 72px; height: 72px; border-radius: var(--radius-sm);
+  overflow: hidden; border: 1px solid var(--border-md);
+}
+.img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.img-thumb .rm { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.7); border: none; color: #fff; border-radius: 50%; width: 18px; height: 18px; font-size: 11px; cursor: pointer; display: none; align-items: center; justify-content: center; }
+.img-thumb:hover .rm { display: flex; }
+
+/* ── OUTPUT GRID ── */
+.output-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+.out-card {
+  background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+}
+.out-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px; background: var(--bg-3); border-bottom: 1px solid var(--border);
+}
+.out-tag {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 3px 7px; border-radius: 4px;
+}
+.tag-en { background: var(--blue-f); color: var(--blue); }
+.tag-zh { background: var(--green-f); color: var(--green); }
+.tag-ko { background: var(--accent-f); color: var(--accent); }
+.tag-rec { background: var(--yellow-f); color: var(--yellow); }
+.out-num { font-size: 10px; color: var(--text-2); }
+.out-actions { display: flex; gap: 5px; }
+.copy-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 9px; background: var(--bg-5); border: 1px solid var(--border-md);
+  border-radius: var(--radius-xs); color: var(--text-1); font-size: 10.5px;
+  font-weight: 500; cursor: pointer; transition: all 0.13s; white-space: nowrap;
+  font-family: inherit;
+}
+.copy-btn:hover { color: var(--text-0); background: var(--bg-4); }
+.copy-btn.copied { color: var(--green); border-color: var(--green); }
+.regen-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 9px; background: none; border: 1px solid var(--border-md);
+  border-radius: var(--radius-xs); color: var(--text-1); font-size: 10.5px;
+  font-weight: 500; cursor: pointer; transition: all 0.13s; white-space: nowrap;
+  font-family: inherit;
+}
+.regen-btn:hover { color: var(--accent); border-color: var(--accent); }
+.out-body {
+  padding: 11px 12px; font-size: 12.5px; line-height: 1.7; color: var(--text-0);
+  white-space: pre-wrap; min-height: 60px; position: relative;
+}
+.out-ko {
+  padding: 8px 12px 10px; font-size: 11.5px; line-height: 1.6; color: var(--text-1);
+  border-top: 1px solid var(--border); white-space: pre-wrap;
+}
+.ph { color: var(--text-2); font-style: italic; font-size: 12px; }
+
+/* ── IMAGE ANALYSIS ── */
+.analysis-card {
+  background: var(--bg-2); border: 1px solid var(--yellow-f);
+  border-radius: var(--radius); padding: 14px; margin-bottom: 0;
+}
+.analysis-card .a-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--yellow); margin-bottom: 8px; }
+.analysis-body { font-size: 12.5px; line-height: 1.7; color: var(--text-0); white-space: pre-wrap; }
+
+/* ── LOADING ── */
+.dots { display: inline-flex; gap: 3px; align-items: center; }
+.dots span { width: 5px; height: 5px; border-radius: 50%; background: var(--text-1); animation: dotbounce 1.2s infinite; }
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotbounce { 0%,80%,100%{transform:scale(0.6);opacity:0.4}40%{transform:scale(1);opacity:1} }
+
+/* ── MODAL ── */
+.modal-ov { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 200; align-items: center; justify-content: center; }
+.modal-ov.show { display: flex; }
+.modal { background: var(--bg-2); border: 1px solid var(--border-hi); border-radius: 12px; padding: 22px; width: 380px; max-width: 92vw; }
+.modal h3 { font-size: 15px; margin-bottom: 6px; }
+.modal p { font-size: 12px; color: var(--text-1); margin-bottom: 14px; }
+.modal-inp {
+  width: 100%; background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 11px; color: var(--text-0);
+  font-size: 13px; outline: none; font-family: inherit; margin-bottom: 13px;
+}
+.modal-inp:focus { border-color: var(--accent); }
+.modal-btns { display: flex; gap: 7px; justify-content: flex-end; }
+.btn-sm {
+  padding: 7px 14px; border-radius: var(--radius-sm); font-size: 12px;
+  font-weight: 600; cursor: pointer; border: 1px solid transparent;
+  transition: all 0.13s; font-family: inherit;
+}
+.btn-ghost-sm { background: var(--bg-4); border-color: var(--border-md); color: var(--text-1); }
+.btn-ghost-sm:hover { color: var(--text-0); }
+.btn-accent-sm { background: var(--accent-f); border-color: var(--accent); color: var(--accent); }
+.btn-accent-sm:hover { background: var(--accent-f2); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 18px; right: 18px;
+  background: var(--bg-3); border: 1px solid var(--border-hi);
+  border-radius: var(--radius); padding: 9px 14px; font-size: 12.5px;
+  color: var(--text-0); z-index: 999;
+  transform: translateY(50px); opacity: 0;
+  transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1); pointer-events: none;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.ok { border-color: var(--green); color: var(--green); }
+.toast.err { border-color: var(--red); color: var(--red); }
+
+/* ── KLING CAMERA PRESETS ── */
+.preset-section { margin-bottom: 6px; }
+.preset-sec-lbl { font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2); margin-bottom: 6px; }
+
+/* ── STYLE TYPE SWITCHER ── */
+.style-type-row { display: flex; gap: 4px; }
+.style-type-btn {
+  padding: 4px 12px; border-radius: 20px; font-size: 11.5px; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--border-md); background: var(--bg-3);
+  color: var(--text-1); transition: all 0.13s; white-space: nowrap; font-family: inherit;
+}
+.style-type-btn:hover { color: var(--text-0); border-color: var(--border-hi); }
+.style-type-btn.real.active { background: var(--blue-f); border-color: var(--blue); color: var(--blue); }
+.style-type-btn.anime.active { background: var(--pink-f); border-color: var(--pink); color: var(--pink); }
+
+/* ── MOOD GROUPS ── */
+.mood-group { margin-top: 10px; }
+.mood-group-lbl {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-2); margin-bottom: 6px;
+}
+.pill.active-pink { background: var(--pink-f); border-color: var(--pink); color: var(--pink); }
+
+/* ── ANGLE GROUPS ── */
+.angle-group { margin-top: 10px; }
+.angle-group-lbl {
+  font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-2); margin-bottom: 6px;
+}
+.pill.active-blue { background: var(--blue-f); border-color: var(--blue); color: var(--blue); }
+.pill.active-blue.ai-rec { box-shadow: 0 0 0 1.5px var(--yellow); }
+.panel-hint { font-size: 10px; color: var(--accent); font-style: italic; }
+.preset-hint { font-size: 9px; color: var(--text-2); font-weight: 400; font-style: italic; letter-spacing: 0; text-transform: none; }
+.pill.auto-pill { border-style: dashed; }
+.pill.auto-pill.active-green { border-style: solid; }
+
+/* ── ANALYSIS CARD ── */
+.a-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.a-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--yellow); }
+.a-apply-btn {
+  padding: 3px 10px; border-radius: var(--radius-xs); font-size: 10.5px; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--yellow); background: var(--yellow-f);
+  color: var(--yellow); transition: all 0.13s; font-family: inherit;
+}
+.a-apply-btn:hover { background: rgba(251,191,36,0.22); }
+.analysis-kw-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+.kw-chip {
+  padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  cursor: pointer; border: 1px dashed var(--yellow); background: var(--yellow-f);
+  color: var(--yellow); transition: all 0.13s;
+}
+.kw-chip:hover { background: rgba(251,191,36,0.22); }
+.kw-chip.applied { border-style: solid; opacity: 0.5; cursor: default; }
+
+/* ── PLANNER ── */
+.plan-panel { border-color: rgba(167,139,250,0.2); }
+.plan-desc { font-size: 11.5px; color: var(--text-1); margin-bottom: 8px; line-height: 1.6; }
+.plan-ta {
+  width: 100%; min-height: 72px; background: var(--bg-3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 10px; color: var(--text-0);
+  font-size: 12.5px; font-family: inherit; outline: none; resize: vertical; line-height: 1.6;
+  margin-bottom: 8px;
+}
+.plan-ta:focus { border-color: var(--accent); }
+.plan-ta::placeholder { color: var(--text-2); }
+.plan-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: var(--radius-sm);
+  background: var(--accent-f); border: 1px solid var(--accent);
+  color: var(--accent); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.13s; font-family: inherit;
+}
+.plan-btn:hover { background: var(--accent-f2); }
+.plan-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.plan-result {
+  margin-top: 10px; padding: 12px; background: var(--bg-3);
+  border: 1px solid var(--border-md); border-radius: var(--radius-sm);
+  font-size: 12.5px; line-height: 1.75; color: var(--text-0); white-space: pre-wrap;
+}
+.plan-toggle-btn {
+  background: none; border: 1px solid var(--border-md); border-radius: var(--radius-xs);
+  color: var(--text-1); font-size: 11px; padding: 3px 9px; cursor: pointer;
+  transition: all 0.13s; font-family: inherit;
+}
+.plan-toggle-btn:hover { color: var(--text-0); border-color: var(--border-hi); }
+
+/* ── PRO NOTICE ── */
+.pro-notice {
+  font-size: 10.5px; color: var(--text-1); line-height: 1.6;
+  padding: 7px 8px; background: var(--accent-f);
+  border: 1px solid var(--accent); border-radius: var(--radius-xs);
+  margin-top: 4px;
+}
+
+/* ── COPY MODAL ── */
+.copy-modal-ov {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75); z-index: 300;
+  align-items: center; justify-content: center;
+}
+.copy-modal-ov.show { display: flex; }
+.copy-modal {
+  background: var(--bg-2); border: 1px solid var(--accent);
+  border-radius: 14px; padding: 22px; width: 560px; max-width: 94vw;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.copy-modal-title { font-size: 13px; font-weight: 700; color: var(--text-0); }
+.copy-modal-desc {
+  font-size: 11.5px; color: var(--text-1); line-height: 1.6;
+  padding: 8px 10px; background: var(--accent-f);
+  border-radius: var(--radius-xs); border: 1px solid var(--accent);
+}
+.copy-modal-ta {
+  width: 100%; height: 200px; background: var(--bg-3);
+  border: 1px solid var(--border-md); border-radius: var(--radius-sm);
+  padding: 10px 12px; color: var(--text-0); font-size: 11.5px;
+  font-family: 'JetBrains Mono', monospace; outline: none;
+  resize: none; line-height: 1.65;
+}
+.copy-modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+.big-copy-btn {
+  display: flex; align-items: center; gap: 7px;
+  padding: 9px 20px; border-radius: var(--radius-sm);
+  background: var(--accent); border: none; color: #fff;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  transition: all 0.15s; font-family: inherit;
+}
+.big-copy-btn:hover { background: #b89ffe; }
+.big-copy-btn.done { background: var(--green); }
+.close-modal-btn {
+  padding: 9px 16px; border-radius: var(--radius-sm);
+  background: var(--bg-4); border: 1px solid var(--border-md);
+  color: var(--text-1); font-size: 13px; cursor: pointer;
+  font-family: inherit; transition: all 0.13s;
+}
+.close-modal-btn:hover { color: var(--text-0); }
+
+/* ── DROPDOWN CTRL ── */
+.ctrl-dropdown-wrap { position: relative; }
+.ctrl-dropdown-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: var(--radius-xs);
+  background: var(--bg-3); border: 1px solid var(--border-md);
+  color: var(--text-0); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all 0.13s;
+  white-space: nowrap;
+}
+.ctrl-dropdown-btn:hover { border-color: var(--accent); color: var(--accent); }
+.ctrl-dropdown-btn.open { border-color: var(--accent); color: var(--accent); background: var(--accent-f); }
+.ctrl-dropdown {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 50;
+  background: var(--bg-2); border: 1px solid var(--border-hi);
+  border-radius: var(--radius); padding: 10px 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  min-width: 220px; max-width: 300px;
+}
+
+/* ── FOLD ARROW ── */
+.fold-arrow {
+  font-size: 11px; color: var(--text-2);
+  transition: transform 0.2s; margin-left: auto;
+}
+.fold-arrow.open { transform: rotate(180deg); }
+.panel-hd:hover .fold-arrow { color: var(--text-1); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-5); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>✦ Prompt Studio</h1>
+    <p>Claude Sonnet · AI 프롬프트 생성기</p>
+  </div>
+  <!-- THEME TOGGLE -->
+  <div class="theme-toggle">
+    <button class="theme-btn" id="btnDay" onclick="setTheme('day')">☀️ Day</button>
+    <button class="theme-btn active" id="btnNight" onclick="setTheme('night')">🌙 Night</button>
+  </div>
+  <div class="proj-label">프로젝트</div>
+  <div class="proj-list" id="projList"></div>
+  <button class="new-proj-btn" onclick="openModal()">
+    <span style="font-size:14px">＋</span> 새 프로젝트
+  </button>
+  <div class="api-box">
+    <div class="api-lbl">✓ Claude Pro 모드</div>
+    <div class="pro-notice">
+      생성 버튼을 누르면 Claude에게 보낼 지시문이 자동으로 만들어져요.<br>
+      복사해서 이 채팅창에 붙여넣으면 끝!
+    </div>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+  <!-- EMPTY STATE -->
+  <div class="empty-wrap" id="emptyState">
+    <div class="empty-box">
+      <div class="icon">🎬</div>
+      <h2>프로젝트를 선택하거나 만드세요</h2>
+      <p>왼쪽에서 새 프로젝트를 만들면<br>이미지·영상 프롬프트를 따로 관리할 수 있어요</p>
+    </div>
+  </div>
+
+  <!-- WORKSPACE -->
+  <div class="workspace" id="workspace" style="display:none">
+    <!-- CATEGORY TAB BAR -->
+    <div class="cat-bar">
+      <div class="cat-tab active" id="catImg" onclick="switchCat('image')">
+        <span class="cat-icon">🖼</span> 이미지
+      </div>
+      <div class="cat-tab" id="catVid" onclick="switchCat('video')">
+        <span class="cat-icon">🎬</span> 영상
+      </div>
+    </div>
+
+    <!-- ── IMAGE PANE ── -->
+    <div class="content" id="paneImage">
+
+      <!-- CONTROL BAR — 드롭다운 방식 -->
+      <div class="ctrl-bar">
+        <!-- TOOL -->
+        <div class="ctrl-group ctrl-dropdown-wrap">
+          <div class="ctrl-label">툴</div>
+          <button class="ctrl-dropdown-btn" id="imgToolBtn" onclick="toggleDropdown('imgToolDrop', this)">
+            <span id="imgToolCur">힉스필드</span> ▾
+          </button>
+          <div class="ctrl-dropdown" id="imgToolDrop" style="display:none">
+            <div class="pill-row" id="imgToolPills"></div>
+          </div>
+        </div>
+        <div class="ctrl-divider"></div>
+        <!-- RATIO -->
+        <div class="ctrl-group ctrl-dropdown-wrap">
+          <div class="ctrl-label">비율</div>
+          <button class="ctrl-dropdown-btn" id="imgRatioBtn" onclick="toggleDropdown('imgRatioDrop', this)">
+            <span id="imgRatioCur">16:9</span> ▾
+          </button>
+          <div class="ctrl-dropdown" id="imgRatioDrop" style="display:none">
+            <div class="pill-row" id="imgRatioPills"></div>
+          </div>
+        </div>
+        <div class="ctrl-divider"></div>
+        <!-- QUALITY -->
+        <div class="ctrl-group ctrl-dropdown-wrap">
+          <div class="ctrl-label">화질</div>
+          <button class="ctrl-dropdown-btn" id="imgQualityBtn" onclick="toggleDropdown('imgQualityDrop', this)">
+            <span id="imgQualityCur">2K</span> ▾
+          </button>
+          <div class="ctrl-dropdown" id="imgQualityDrop" style="display:none">
+            <div class="pill-row" id="imgQualityPills"></div>
+          </div>
+        </div>
+        <div class="ctrl-divider"></div>
+        <!-- COUNT -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">추천 수</div>
+          <div class="stepper">
+            <button class="step-btn" id="imgCountMinus" onclick="changeCount('image',-1)">−</button>
+            <span class="step-val" id="imgCountVal">1</span>
+            <button class="step-btn" id="imgCountPlus" onclick="changeCount('image',1)">＋</button>
+          </div>
+        </div>
+        <!-- GENERATE -->
+        <button class="gen-btn" id="genImgBtn" onclick="generateImage()">
+          <span class="spark">✦</span> 지시문 생성 & 복사
+        </button>
+      </div>
+
+      <!-- IMAGE UPLOAD + ANALYSIS -->
+      <div class="img-drop" id="imgDropZone" onclick="document.getElementById('imgFileInp').click()">
+        <input type="file" id="imgFileInp" accept="image/*" multiple onchange="handleImgUpload(event)" />
+        <div class="di">🖼</div>
+        <div>레퍼런스 이미지 업로드 → AI가 앵글·무드·활용법 자동 추천</div>
+        <div style="font-size:11px;margin-top:4px;color:var(--text-2)">(선택사항) 클릭하거나 드래그</div>
+      </div>
+      <div class="img-previews" id="imgPreviews"></div>
+      <div id="analysisCard" style="display:none" class="analysis-card">
+        <div class="a-title-row">
+          <span class="a-title">📋 이미지 분석 요청문</span>
+          <button class="a-apply-btn" id="applyAnalysisBtn" onclick="copyAnalysisPrompt()">Claude에 복사</button>
+        </div>
+        <div class="analysis-body" id="analysisBody"></div>
+        <div id="analysisKeywords" class="analysis-kw-row"></div>
+      </div>
+
+      <!-- 기획 도우미 -->
+      <div class="panel plan-panel">
+        <div class="panel-hd" onclick="togglePanel('plannerBody', this)" style="cursor:pointer">
+          <span class="panel-title">💡 기획 도우미</span>
+          <span class="fold-arrow">▾</span>
+        </div>
+        <div id="plannerBody" style="display:none; margin-top:10px;">
+          <div class="plan-desc">어떤 장면을 만들고 싶은지 자유롭게 말하면, AI가 구체적인 프롬프트 방향을 제안해드려요</div>
+          <textarea class="plan-ta" id="plannerInput" placeholder="예: 소속사 아티스트 공연 포스터 느낌으로, 조명이 강렬하고 군중이 환호하는 무대 위 모습&#10;또는: 앨범 커버용으로 벚꽃 아래 90년대 일본 감성 여성 솔로샷"></textarea>
+          <button class="plan-btn" onclick="runPlanner('image')">
+            <span>✦</span> 기획 방향 제안받기
+          </button>
+          <div id="plannerResult" class="plan-result" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- 앵글 & 샷 사이즈 -->
+      <div class="panel">
+        <div class="panel-hd" onclick="togglePanel('imgAngleGroups', this)" style="cursor:pointer">
+          <span class="panel-title">📐 앵글 & 샷 사이즈</span>
+          <span class="fold-arrow">▾</span><span class="panel-hint" id="angleHint" style="margin-right:4px"></span>
+        </div>
+        <div id="imgAngleGroups" style="display:none"></div>
+      </div>
+
+      <!-- STYLE TYPE + MOOD -->
+      <div class="panel">
+        <div class="panel-hd" onclick="togglePanel('imgMoodInner', this)" style="cursor:pointer">
+          <span class="panel-title">🎨 스타일 타입 & 분위기</span>
+          <span class="fold-arrow">▾</span>
+        </div>
+        <div id="imgMoodInner" style="display:none; padding-top:10px;">
+          <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+            <div class="style-type-row" id="imgStyleTypePills"></div>
+          </div>
+          <div id="imgMoodGroups"></div>
+        </div>
+      </div>
+
+      <!-- SAVED PHRASES -->
+      <div class="panel">
+        <div class="panel-hd" onclick="togglePanel('imgPhrasesInner', this)" style="cursor:pointer">
+          <span class="panel-title">📌 고정 문장 라이브러리</span>
+          <span class="fold-arrow">▾</span>
+        </div>
+        <div id="imgPhrasesInner" style="display:none; padding-top:10px;">
+          <div class="chip-row" id="phrasesImg"></div>
+          <div class="add-chip-row">
+            <input type="text" class="add-inp" id="phraseInpImg" placeholder="고정 문장 추가... (예: 머리 스타일 브릿지 유지)" />
+            <button class="add-chip-btn" onclick="addPhrase('image')">추가</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROMPT INPUT -->
+      <div class="prompt-wrap">
+        <div class="prompt-top">
+          <span class="prompt-lbl">프롬프트 입력</span>
+          <span class="prompt-hint">한국어로 자유롭게 입력하세요</span>
+        </div>
+        <textarea class="prompt-ta" id="promptImg" placeholder="어떤 이미지를 만들고 싶은지 설명해주세요&#10;예: 벚꽃 아래에 서있는 여자, 90년대 일본 애니 감성"></textarea>
+      </div>
+
+      <!-- STYLE MATRIX -->
+      <div class="matrix-panel" id="matrixImg" style="display:none">
+        <div class="matrix-header" onclick="togglePanel('matrixGridImg', this)" style="cursor:pointer">
+          <span class="matrix-title">✦ 스타일 매트릭스 — 변형 버전</span>
+          <span class="fold-arrow" style="color:var(--text-2);font-size:11px">▾</span>
+        </div>
+        <div class="matrix-grid" id="matrixGridImg"></div>
+      </div>
+
+      <!-- OUTPUTS -->
+      <div class="output-grid" id="outputGridImg"></div>
+    </div>
+
+    <!-- ── VIDEO PANE ── -->
+    <div class="content" id="paneVideo" style="display:none">
+
+      <!-- CONTROL BAR -->
+      <div class="ctrl-bar">
+        <!-- TOOL -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">툴 선택</div>
+          <div class="pill-row" id="vidToolPills"></div>
+        </div>
+        <div class="ctrl-divider"></div>
+        <!-- RATIO -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">비율</div>
+          <div class="pill-row" id="vidRatioPills"></div>
+        </div>
+        <div class="ctrl-divider"></div>
+        <!-- QUALITY -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">화질</div>
+          <div class="pill-row" id="vidQualityPills"></div>
+        </div>
+        <div class="ctrl-divider"></div>
+        <!-- COUNT -->
+        <div class="ctrl-group">
+          <div class="ctrl-label">추천 수</div>
+          <div class="stepper">
+            <button class="step-btn" id="vidCountMinus" onclick="changeCount('video',-1)">−</button>
+            <span class="step-val" id="vidCountVal">1</span>
+            <button class="step-btn" id="vidCountPlus" onclick="changeCount('video',1)">＋</button>
+          </div>
+        </div>
+        <!-- GENERATE -->
+        <button class="gen-btn" id="genVidBtn" onclick="generateVideo()">
+          <span class="spark">✦</span> 지시문 생성 & 복사
+        </button>
+      </div>
+
+      <!-- CONTROL BAR — 드롭다운 방식 -->
+      <div class="ctrl-bar">
+        <div class="ctrl-group ctrl-dropdown-wrap">
+          <div class="ctrl-label">툴</div>
+          <button class="ctrl-dropdown-btn" id="vidToolBtn" onclick="toggleDropdown('vidToolDrop', this)">
+            <span id="vidToolCur">클링</span> ▾
+          </button>
+          <div class="ctrl-dropdown" id="vidToolDrop" style="display:none">
+            <div class="pill-row" id="vidToolPills"></div>
+          </div>
+        </div>
+        <div class="ctrl-divider"></div>
+        <div class="ctrl-group ctrl-dropdown-wrap">
+          <div class="ctrl-label">비율</div>
+          <button class="ctrl-dropdown-btn" id="vidRatioBtn" onclick="toggleDropdown('vidRatioDrop', this)">
+            <span id="vidRatioCur">16:9</span> ▾
+          </button>
+          <div class="ctrl-dropdown" id="vidRatioDrop" style="display:none">
+            <div class="pill-row" id="vidRatioPills"></div>
+          </div>
+        </div>
+        <div class="ctrl-divider"></div>
+        <div class="ctrl-group ctrl-dropdown-wrap">
+          <div class="ctrl-label">화질</div>
+          <button class="ctrl-dropdown-btn" id="vidQualityBtn" onclick="toggleDropdown('vidQualityDrop', this)">
+            <span id="vidQualityCur">1080p</span> ▾
+          </button>
+          <div class="ctrl-dropdown" id="vidQualityDrop" style="display:none">
+            <div class="pill-row" id="vidQualityPills"></div>
+          </div>
+        </div>
+        <div class="ctrl-divider"></div>
+        <div class="ctrl-group">
+          <div class="ctrl-label">추천 수</div>
+          <div class="stepper">
+            <button class="step-btn" id="vidCountMinus" onclick="changeCount('video',-1)">−</button>
+            <span class="step-val" id="vidCountVal">1</span>
+            <button class="step-btn" id="vidCountPlus" onclick="changeCount('video',1)">＋</button>
+          </div>
+        </div>
+        <button class="gen-btn" id="genVidBtn" onclick="generateVideo()">
+          <span class="spark">✦</span> 지시문 생성 & 복사
+        </button>
+      </div>
+
+      <!-- 기획 도우미 (영상) -->
+      <div class="panel plan-panel">
+        <div class="panel-hd" onclick="togglePanel('plannerBodyVid', this)" style="cursor:pointer">
+          <span class="panel-title">💡 기획 도우미</span>
+          <span class="fold-arrow">▾</span>
+        </div>
+        <div id="plannerBodyVid" style="display:none; margin-top:10px;">
+          <div class="plan-desc">어떤 영상 장면인지 말하면, AI가 카메라 무빙·질감·효과 조합을 추천해드려요</div>
+          <textarea class="plan-ta" id="plannerInputVid" placeholder="예: 뮤직비디오용으로 여자가 비 맞으며 걷는 장면, 빈티지 느낌&#10;또는: SNS 릴스용 짧고 강렬한 K-팝 퍼포먼스 영상"></textarea>
+          <button class="plan-btn" onclick="runPlanner('video')">
+            <span>✦</span> 기획 방향 제안받기
+          </button>
+          <div id="plannerResultVid" class="plan-result" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- CAMERA PRESETS -->
+      <div class="panel">
+        <div class="panel-hd" onclick="togglePanel('camPresetsInner', this)" style="cursor:pointer">
+          <span class="panel-title">🎥 카메라 설정</span>
+          <span class="fold-arrow">▾</span>
+        </div>
+        <div id="camPresetsInner" style="display:none; padding-top:10px;">
+          <div class="preset-section">
+            <div class="preset-sec-lbl">카메라 무빙 <span class="preset-hint">(Auto = AI가 자동 선택)</span></div>
+            <div class="pill-row" id="camMovePills"></div>
+          </div>
+          <div class="preset-section" style="margin-top:12px">
+            <div class="preset-sec-lbl">카메라 질감 / 화질 <span class="preset-hint">(Auto = AI가 자동 선택)</span></div>
+            <div class="pill-row" id="camTexPills"></div>
+          </div>
+          <div class="preset-section" style="margin-top:12px">
+            <div class="preset-sec-lbl">효과 <span class="preset-hint">(Auto = AI가 자동 선택)</span></div>
+            <div class="pill-row" id="camFxPills"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MOOD PRESETS -->
+      <div class="panel">
+        <div class="panel-hd" onclick="togglePanel('vidMoodInner', this)" style="cursor:pointer">
+          <span class="panel-title">🎨 스타일 타입 & 분위기</span>
+          <span class="fold-arrow">▾</span>
+        </div>
+        <div id="vidMoodInner" style="display:none; padding-top:10px;">
+          <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+            <div class="style-type-row" id="vidStyleTypePills"></div>
+          </div>
+          <div id="vidMoodGroups"></div>
+        </div>
+      </div>
+
+      <!-- SAVED PHRASES -->
+      <div class="panel">
+        <div class="panel-hd" onclick="togglePanel('vidPhrasesInner', this)" style="cursor:pointer">
+          <span class="panel-title">📌 고정 문장 라이브러리</span>
+          <span class="fold-arrow">▾</span>
+        </div>
+        <div id="vidPhrasesInner" style="display:none; padding-top:10px;">
+          <div class="chip-row" id="phrasesVid"></div>
+          <div class="add-chip-row">
+            <input type="text" class="add-inp" id="phraseInpVid" placeholder="고정 문장 추가... (예: 절대 개체수 증가 없이)" />
+            <button class="add-chip-btn" onclick="addPhrase('video')">추가</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROMPT INPUT -->
+      <div class="prompt-wrap">
+        <div class="prompt-top">
+          <span class="prompt-lbl">프롬프트 입력</span>
+          <span class="prompt-hint">한국어로 자유롭게 입력하세요</span>
+        </div>
+        <textarea class="prompt-ta" id="promptVid" placeholder="어떤 영상을 만들고 싶은지 설명해주세요&#10;예: 카메라 고정, 흰 새 8마리가 오른쪽에서 왼쪽으로 날아가고 디졸브로 다시 나타난다"></textarea>
+      </div>
+
+      <!-- STYLE MATRIX -->
+      <div class="matrix-panel" id="matrixVid" style="display:none">
+        <div class="matrix-header" onclick="togglePanel('matrixGridVid', this)" style="cursor:pointer">
+          <span class="matrix-title">✦ 스타일 매트릭스 — 변형 버전</span>
+          <span class="fold-arrow" style="color:var(--text-2);font-size:11px">▾</span>
+        </div>
+        <div class="matrix-grid" id="matrixGridVid"></div>
+      </div>
+
+      <!-- OUTPUTS -->
+      <div class="output-grid" id="outputGridVid"></div>
+    </div>
+  </div>
+</main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modal">
+  <div class="modal">
+    <h3>새 프로젝트</h3>
+    <p>영상 1개 = 프로젝트 1개로 관리해요</p>
+    <input type="text" class="modal-inp" id="projNameInp" placeholder="프로젝트 이름 (예: 웨딩 커플 영상)" />
+    <div class="modal-btns">
+      <button class="btn-sm btn-ghost-sm" onclick="closeModal()">취소</button>
+      <button class="btn-sm btn-accent-sm" onclick="createProject()">만들기</button>
+    </div>
+  </div>
+</div>
+
+<!-- COPY TO CLAUDE MODAL -->
+<div class="copy-modal-ov" id="copyModal">
+  <div class="copy-modal">
+    <div class="copy-modal-title">✦ Claude에게 보낼 지시문이 준비됐어요</div>
+    <div class="copy-modal-desc">
+      아래 텍스트를 복사한 뒤, <strong>Claude 채팅창에 붙여넣기</strong> 하면 바로 프롬프트를 생성해줘요!
+    </div>
+    <textarea class="copy-modal-ta" id="copyModalText" readonly></textarea>
+    <div class="copy-modal-btns">
+      <button class="close-modal-btn" onclick="closeCopyModal()">닫기</button>
+      <button class="big-copy-btn" id="bigCopyBtn" onclick="doCopyToClipboard()">📋 클립보드에 복사</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════
+// ═══════════════════════════════════
+//  STYLE MATRIX DATA
+// ═══════════════════════════════════
+const IMG_STYLE_MATRIX = [
+  { id:'vintage', icon:'📼', name:'빈티지 필름', desc:'90년대 VHS · 색바랜 노스탤직',
+    mod_ko:'90년대 VHS 테이프 질감, 색이 바랜 색감, 화면 노이즈와 스캔라인, 부드러운 빛번짐',
+    mod_en:'90s VHS tape aesthetic, faded vintage colors, film grain noise, soft analog halation, retro nostalgic',
+    mj:'--v 6.0 --style raw --chaos 15' },
+  { id:'sf', icon:'🚀', name:'미래 SF', desc:'홀로그램 · 청록 네온 · 사이버펑크',
+    mod_ko:'미래 SF 배경, 홀로그램 효과, 차가운 청록색 네온 조명, 금속성 사이버펑크 질감',
+    mod_en:'futuristic SF background, holographic overlay, cold cyan-blue neon lighting, metallic cyberpunk texture',
+    mj:'--v 6.0 --style raw --chaos 30' },
+  { id:'collage', icon:'🎨', name:'아트 콜라주', desc:'텍스처 혼합 · 비정형 레이아웃',
+    mod_ko:'아티스틱 콜라주, 다양한 텍스처와 패턴 혼합, 비정형 레이아웃, 대담한 색상 대비',
+    mod_en:'artistic collage, mixed textures and patterns, asymmetric layout, magazine cutout, bold color contrasts',
+    mj:'--v 6.0 --chaos 50' },
+  { id:'dark', icon:'🎬', name:'다크 시네마틱', desc:'고대비 조명 · 깊은 그림자 · 아나모픽',
+    mod_ko:'다크 시네마틱, 고대비 극적 조명, 깊은 그림자, 아나모픽 렌즈 플레어',
+    mod_en:'dark cinematic, high contrast dramatic lighting, deep shadows, anamorphic lens flare, cold noir atmosphere',
+    mj:'--v 6.0 --style raw --ar 2.39:1' },
+  { id:'ghibli', icon:'🌸', name:'지브리 감성', desc:'핸드드로운 · 따뜻한 배경 · 동화풍',
+    mod_ko:'지브리 스튜디오 스타일, 핸드드로운 배경 미술, 따뜻하고 부드러운 색감, 동화적 분위기',
+    mod_en:'Studio Ghibli inspired, hand-drawn background art, warm soft color palette, storybook fairytale atmosphere',
+    mj:'--niji 6 --style scenic' },
+  { id:'y2k', icon:'✨', name:'Y2K 팝', desc:'2000년대 · 채도 높은 팝 · 반짝이',
+    mod_ko:'Y2K 감성, 채도 높은 팝 색감, 반짝이는 질감, 2000년대 초 트렌디한 스타일',
+    mod_en:'Y2K aesthetic, vibrant saturated pop colors, glittery metallic sheen, early 2000s trendy style',
+    mj:'--v 6.0 --style raw --chaos 20' },
+  { id:'mono', icon:'🖤', name:'모노크롬', desc:'흑백 · 강한 대비 · 아트 필름',
+    mod_ko:'흑백 모노크롬, 강한 명암 대비, 예술적인 흑백 필름 느낌, 클래식 사진 감성',
+    mod_en:'black and white monochrome, strong contrast, artistic film noir aesthetic, classic photography mood',
+    mj:'--v 6.0 --style raw --chaos 10' },
+  { id:'dream', icon:'🌙', name:'몽환 드림', desc:'파스텔 · 보케 · 부드러운 빛',
+    mod_ko:'몽환적이고 꿈 같은 분위기, 부드러운 파스텔 색감, 아웃포커스 보케, 빛이 번지는 효과',
+    mod_en:'dreamy ethereal atmosphere, soft pastel colors, gentle bokeh blur, glowing light diffusion, surreal mood',
+    mj:'--v 6.0 --chaos 25' },
+];
+
+const VID_STYLE_MATRIX = [
+  { id:'dv', icon:'📹', name:'DV 캠코더', desc:'빈티지 캠코더 · 핸드헬드 흔들림',
+    mod_ko:'빈티지 DV 캠코더 질감, 핸드헬드 흔들림, 천천히 줌인/줌아웃',
+    mod_zh:'复古DV摄像机手持拍摄，轻微抖动，缓慢推拉镜头，VHS质感',
+    mod_en:'vintage DV camcorder footage, handheld shakiness, slow zoom in out, VHS texture' },
+  { id:'cinematic', icon:'🎬', name:'시네마틱', desc:'4K 아나모픽 · 렌즈 플레어',
+    mod_ko:'시네마틱 4K, 아나모픽 렌즈 플레어, 영화 같은 색보정, 와이드 샷',
+    mod_zh:'电影感4K，变形镜头光晕，电影色调，宽幅画面',
+    mod_en:'cinematic 4K, anamorphic lens flare, film color grade, wide aspect ratio' },
+  { id:'slowmo', icon:'🌊', name:'슬로우 모션', desc:'감정적 · 부드럽게 흐르는',
+    mod_ko:'슬로우 모션, 부드럽게 흐르는 움직임, 감정적이고 서정적인 연출',
+    mod_zh:'慢动作，流畅柔和的动作，情感化抒情演绎',
+    mod_en:'slow motion, graceful flowing movement, emotional lyrical cinematography' },
+  { id:'sf_vid', icon:'🚀', name:'미래 SF', desc:'홀로그램 · 사이버펑크 네온',
+    mod_ko:'미래 SF 배경, 홀로그램 UI, 청록색 네온, 금속성 사이버펑크',
+    mod_zh:'未来科幻背景，全息界面，青蓝霓虹，金属赛博朋克',
+    mod_en:'futuristic SF setting, holographic UI elements, cyan neon lighting, cyberpunk' },
+  { id:'ghibli_vid', icon:'🌸', name:'지브리 애니', desc:'부드러운 애니 · 자연 배경',
+    mod_ko:'지브리 감성 애니메이션, 부드러운 자연 배경, 따뜻한 색감, 서정적 분위기',
+    mod_zh:'吉卜力动画风格，柔和自然背景，温暖色调，抒情氛围',
+    mod_en:'Ghibli anime style, soft natural background, warm tones, lyrical atmosphere' },
+  { id:'vintage_vid', icon:'📼', name:'빈티지 필름', desc:'필름 그레인 · 색바랜 노스탤직',
+    mod_ko:'빈티지 필름 그레인, 색바랜 색감, 빛번짐, 노스탤직한 분위기',
+    mod_zh:'复古胶片颗粒感，褪色色调，光晕，怀旧氛围',
+    mod_en:'vintage film grain, faded color palette, light halation, nostalgic atmosphere' },
+  { id:'dark_vid', icon:'🌑', name:'다크 무드', desc:'고대비 · 깊은 그림자 · 극적',
+    mod_ko:'다크하고 극적인 조명, 깊은 그림자, 고대비, 서스펜스 분위기',
+    mod_zh:'暗黑戏剧灯光，深度阴影，高对比，悬疑氛围',
+    mod_en:'dark dramatic lighting, deep shadows, high contrast, suspenseful atmosphere' },
+  { id:'dream_vid', icon:'🌙', name:'몽환 드림', desc:'파스텔 보케 · 부드러운 빛',
+    mod_ko:'몽환적인 파스텔 분위기, 부드러운 보케, 빛이 번지는 효과, 꿈 같은 연출',
+    mod_zh:'梦幻柔和氛围，散景效果，光晕，如梦如幻的演绎',
+    mod_en:'dreamy pastel atmosphere, soft bokeh, glowing light effects, ethereal cinematography' },
+];
+
+const IMG_TOOLS = ['힉스필드', '미드저니', '클링', 'Seedream', 'GPT Image', '달리3'];
+const VID_TOOLS = ['클링', 'Seedance', 'Higgsfield', 'Grok', 'Runway', 'Sora'];
+const RATIOS = ['1:1','4:3','3:2','2:3','3:4','9:16','16:9','21:9'];
+const IMG_QUALITY = ['720p', '1080p', '2K', '4K', '캠코더'];
+const VID_QUALITY = ['480p', '720p', '1080p', '2K', '4K'];
+
+// ── STYLE TYPE ──
+const STYLE_TYPES = ['실사', '애니메이션'];
+
+// ── 이미지 앵글 ──
+const IMG_ANGLES = {
+  '카메라 각도': [
+    {l:'정면', en:'front view, straight on'},
+    {l:'왼쪽 사이드', en:'left side profile view'},
+    {l:'오른쪽 사이드', en:'right side profile view'},
+    {l:'좌측 하단 로우앵글', en:'low angle from bottom-left, looking up'},
+    {l:'우측 하단 로우앵글', en:'low angle from bottom-right, looking up'},
+    {l:'하이앵글 (위에서)', en:'high angle shot, looking down'},
+    {l:'버즈아이 (정수리)', en:"bird's eye view, top-down overhead"},
+    {l:'백샷 (뒤에서)', en:'rear view, back shot'},
+    {l:'3/4 앵글', en:'three-quarter angle view'},
+    {l:'더치앵글 (기울기)', en:'dutch angle, tilted camera'},
+  ],
+  '샷 사이즈 / 줌': [
+    {l:'익스트림 클로즈업', en:'extreme close-up, ECU, macro detail'},
+    {l:'클로즈업', en:'close-up shot, face fill frame'},
+    {l:'바스트샷', en:'bust shot, upper body framing'},
+    {l:'웨이스트샷', en:'waist shot, mid-shot'},
+    {l:'니샷', en:'knee shot, 3/4 body'},
+    {l:'풀샷', en:'full body shot, head to toe'},
+    {l:'롱샷', en:'long shot, wide establishing'},
+    {l:'익스트림 롱샷', en:'extreme long shot, vast environment'},
+    {l:'인서트 컷', en:'insert cut, detail shot'},
+    {l:'드론샷 (공중)', en:'aerial drone shot, high altitude'},
+    {l:'어깨 너머', en:'over-the-shoulder shot'},
+  ],
+};
+
+// ── 영상 카메라 무빙 ──
+const CAM_MOVE = [
+  {l:'Auto', zh:'自动', en:'auto camera movement'},
+  {l:'카메라 고정', zh:'镜头固定', en:'static camera, locked shot'},
+  {l:'천천히 당기기', zh:'镜头缓慢拉远', en:'slow pull back'},
+  {l:'천천히 밀기', zh:'镜头缓慢推进', en:'slow push in'},
+  {l:'오른쪽 패닝', zh:'镜头向右横移', en:'pan right'},
+  {l:'왼쪽 패닝', zh:'镜头向左横移', en:'pan left'},
+  {l:'위로 틸트', zh:'镜头向上仰拍', en:'tilt up'},
+  {l:'아래로 틸트', zh:'镜头向下俯拍', en:'tilt down'},
+  {l:'드론 하강', zh:'无人机下降', en:'drone descend'},
+  {l:'드론 상승', zh:'无人机上升', en:'drone ascend'},
+  {l:'360° 회전', zh:'360度环绕镜头', en:'360 orbit'},
+  {l:'핸드헬드 흔들림', zh:'手持摄像晃动', en:'handheld shaky cam'},
+];
+
+// ── 영상 카메라 질감 ──
+const CAM_TEX = [
+  {l:'Auto', zh:'自动', en:'auto'},
+  {l:'DV 캠코더', zh:'复古家用摄像机（DV）质感，画面晃动', en:'vintage DV camcorder footage, consumer grade'},
+  {l:'8mm 필름', zh:'8mm胶片复古质感', en:'8mm film, grain, retro'},
+  {l:'16mm 필름', zh:'16mm胶片质感，细腻颗粒感', en:'16mm film grain, indie cinematic'},
+  {l:'35mm 시네마', zh:'35mm胶片电影质感', en:'35mm cinematic film look'},
+  {l:'시네마틱 4K', zh:'电影感4K画质，宽银幕', en:'cinematic 4K ultra sharp'},
+  {l:'8K 하이퍼리얼', zh:'8K超清画质，超写实', en:'8K hyperrealistic ultra detail'},
+  {l:'VHS 글리치', zh:'VHS画质，故障感', en:'VHS glitch effect, lo-fi'},
+  {l:'CCTV 감시카메라', zh:'监控摄像机画质', en:'CCTV security camera footage'},
+  {l:'브이로그 핸드헬드', zh:'手持Vlog摄像，自然晃动', en:'vlog style handheld'},
+  {l:'드론 4K', zh:'4K无人机航拍', en:'4K drone aerial footage'},
+  {l:'망원렌즈 보케', zh:'长焦镜头，背景虚化', en:'telephoto lens, shallow depth of field, bokeh'},
+];
+
+// ── 영상 효과 ──
+const CAM_FX = [
+  {l:'Auto', zh:'自动', en:'auto'},
+  {l:'디졸브', zh:'溶解效果（Dissolve）', en:'dissolve transition'},
+  {l:'슬로우 모션', zh:'慢动作（Slow Motion）', en:'slow motion'},
+  {l:'타임랩스', zh:'延时摄影', en:'timelapse'},
+  {l:'빠른 컷', zh:'快速剪切', en:'fast cut editing'},
+  {l:'페이드 인/아웃', zh:'淡入淡出', en:'fade in fade out'},
+  {l:'모션 블러', zh:'运动模糊', en:'motion blur'},
+  {l:'화면 흔들림', zh:'画面抖动', en:'camera shake'},
+  {l:'파티클 효과', zh:'粒子效果', en:'particle effects'},
+  {l:'빛 번짐 (렌즈 플레어)', zh:'镜头光晕', en:'lens flare'},
+];
+
+// ── 실사 무드 ──
+const MOODS_REAL = {
+  '시네마틱': ['시네마틱 영화', '네오누아르', '하이퍼리얼', '다큐멘터리', '광고 화보'],
+  '시간대/날씨': ['맑은 여름 오전', '골든아워 석양', '비 오는 밤', '흐린 오후', '새벽 안개', '겨울 설원'],
+  '감성/톤': ['자연광 감성', '빈티지 필름', '드라마틱', '로맨틱', '미니멀', '90년대 Y2K', '네온 사이버', '다크 무드', '몽환적', '초현실적', '팝아트', '흑백 아트'],
+  '장르': ['패션 화보', '뮤직비디오', '웨딩 스냅', '여행 브이로그', '도시 스트릿', '자연 풍경', '음식 사진'],
+};
+
+// ── 애니 무드 ──
+const MOODS_ANIME = {
+  '스타일': ['지브리', '신카이 마코토', '교토 애니메이션', '80s 레트로 셀화', '90s 소녀만화', '2000s 파워팝', '웹툰 감성', '수채화 일러스트', '픽셀 아트', '모노크롬 잉크'],
+  '장르/분위기': ['일상 힐링 (slice of life)', '청춘 로맨스', '판타지 모험', '다크 판타지', 'SF 사이버펑크', '공포 호러', '액션 배틀', '스포츠 열혈', '음악 밴드물'],
+  '연출': ['벚꽃 흩날림', '석양 역광', '비 내리는 창가', '별이 가득한 밤', '교실 방과후', '지하철 통학', '옥상 장면', '여름 축제 불꽃놀이', '겨울 눈 내리는 거리'],
+  '색감': ['파스텔 소프트', '채도 높은 팝', '로우파이 빈티지', '시네마틱 필름룩', '네온 글로우', '따뜻한 세피아'],
+};
+
+const DEFAULT_IMG_PHRASES = [
+  '1번 이미지 속 여자를 2번 여자로 바꿔줘',
+  '3번 이미지 의상을 입는다',
+  '악세사리와 어깨에 있는 가방도 없다',
+  '머리 스타일 브릿지 유지',
+  '맑은 여름 오전 날씨',
+];
+const DEFAULT_VID_PHRASES = [
+  '절대 개체수 증가 없이',
+  '원래 자리에 다시 생긴다',
+  '카메라 앵글 밖으로 나가고',
+  '카메라 고정',
+];
+
+// TOOL LANGUAGE MAP
+const TOOL_LANG = {
+  '힉스필드': 'en', '미드저니': 'en', '클링': 'zh',
+  'Seedream': 'zh', 'GPT Image': 'en', '달리3': 'en',
+  'Seedance': 'zh', 'Higgsfield': 'en', 'Grok': 'en',
+  'Runway': 'en', 'Sora': 'en',
+};
+
+// ═══════════════════════════════════
+//  STATE
+// ═══════════════════════════════════
+let S = {
+  apiKey: '',
+  projects: [],
+  activeProjId: null,
+  activeCat: 'image',
+  img: {
+    tool: '힉스필드', ratio: '16:9', quality: '2K', count: 1,
+    styleType: '실사',
+    moods: new Set(), selectedAngles: new Set(), selectedShots: new Set(),
+    camMove: new Set(), camTex: new Set(), camFx: new Set(),
+    selectedPhrases: new Set(), uploadedImgs: []
+  },
+  vid: {
+    tool: '클링', ratio: '16:9', quality: '1080p', count: 1,
+    styleType: '실사',
+    moods: new Set(), camMove: new Set(), camTex: new Set(), camFx: new Set(),
+    selectedPhrases: new Set()
+  }
+};
+
+// ═══════════════════════════════════
+//  INIT
+// ═══════════════════════════════════
+function init() {
+  // 여러 키에서 데이터 읽기 시도 (마이그레이션)
+  const tryKeys = ['ps_v2', 'ps_v1', 'promptStudioState'];
+  let loaded = null;
+  for (const key of tryKeys) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) { loaded = JSON.parse(raw); break; }
+    } catch(e) {}
+  }
+  if (loaded) {
+    S.apiKey = loaded.apiKey || '';
+    S.projects = loaded.projects || [];
+    S.img.tool = loaded.img?.tool || S.img.tool;
+    S.img.ratio = loaded.img?.ratio || S.img.ratio;
+    S.img.quality = loaded.img?.quality || S.img.quality;
+    S.vid.tool = loaded.vid?.tool || S.vid.tool;
+    S.vid.ratio = loaded.vid?.ratio || S.vid.ratio;
+    S.vid.quality = loaded.vid?.quality || S.vid.quality;
+    // 무조건 ps_v2로 통일 저장
+    save();
+  }
+
+  // theme
+  const savedTheme = localStorage.getItem('ps_theme') || 'night';
+  setTheme(savedTheme, true);
+
+  document.getElementById('apiInp').value = S.apiKey ? '••••••••••••••' : '';
+  updateApiSt();
+  renderProjects();
+  renderAllControls();
+  document.getElementById('projNameInp').addEventListener('keydown', e => { if(e.key==='Enter') createProject(); });
+
+  // drag drop
+  const dz = document.getElementById('imgDropZone');
+  dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.borderColor='var(--accent)'; });
+  dz.addEventListener('dragleave', () => { dz.style.borderColor=''; });
+  dz.addEventListener('drop', e => { e.preventDefault(); dz.style.borderColor=''; handleImgUpload({target:{files:e.dataTransfer.files}}); });
+
+  if (S.projects.length > 0) {
+    loadProject(S.projects[0].id);
+  } else {
+    document.getElementById('emptyState').style.display = 'flex';
+    document.getElementById('workspace').style.display = 'none';
+  }
+}
+
+function save() {
+  localStorage.setItem('ps_v2', JSON.stringify({
+    apiKey: S.apiKey,
+    projects: S.projects,
+    img: { tool: S.img.tool, ratio: S.img.ratio, quality: S.img.quality },
+    vid: { tool: S.vid.tool, ratio: S.vid.ratio, quality: S.vid.quality }
+  }));
+}
+
+// ═══════════════════════════════════
+//  PANEL TOGGLE & DROPDOWN
+// ═══════════════════════════════════
+function togglePanel(bodyId, headerEl) {
+  const body = document.getElementById(bodyId);
+  const arrow = headerEl.querySelector('.fold-arrow');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.classList.toggle('open', !isOpen);
+}
+
+function toggleDropdown(dropId, btnEl) {
+  const drop = document.getElementById(dropId);
+  const isOpen = drop.style.display !== 'none';
+  // close all other dropdowns first
+  document.querySelectorAll('.ctrl-dropdown').forEach(d => { d.style.display='none'; });
+  document.querySelectorAll('.ctrl-dropdown-btn').forEach(b => b.classList.remove('open'));
+  if (!isOpen) {
+    drop.style.display = 'block';
+    btnEl.classList.add('open');
+  }
+}
+
+// close dropdowns on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ctrl-dropdown-wrap')) {
+    document.querySelectorAll('.ctrl-dropdown').forEach(d => { d.style.display='none'; });
+    document.querySelectorAll('.ctrl-dropdown-btn').forEach(b => b.classList.remove('open'));
+  }
+});
+
+// ═══════════════════════════════════
+//  THEME
+// ═══════════════════════════════════
+function setTheme(theme, silent) {
+  document.body.classList.toggle('day', theme === 'day');
+  document.getElementById('btnDay').classList.toggle('active', theme === 'day');
+  document.getElementById('btnNight').classList.toggle('active', theme === 'night');
+  if (!silent) localStorage.setItem('ps_theme', theme);
+}
+
+// ═══════════════════════════════════
+//  STYLE MATRIX
+// ═══════════════════════════════════
+function renderStyleMatrix(cat, basePrompt) {
+  const matrix = cat === 'image' ? IMG_STYLE_MATRIX : VID_STYLE_MATRIX;
+  const panelId = cat === 'image' ? 'matrixImg' : 'matrixVid';
+  const gridId = cat === 'image' ? 'matrixGridImg' : 'matrixGridVid';
+  const tool = cat === 'image' ? S.img.tool : S.vid.tool;
+  const isZh = TOOL_LANG[tool] === 'zh';
+  const ratio = cat === 'image' ? S.img.ratio : S.vid.ratio;
+
+  const panel = document.getElementById(panelId);
+  const grid = document.getElementById(gridId);
+  panel.style.display = 'block';
+  grid.innerHTML = '';
+
+  matrix.forEach(style => {
+    const card = document.createElement('div');
+    card.className = 'mx-card';
+
+    // build the full prompt variations
+    const mjPrompt = `${basePrompt}\n${style.mod_en} --ar ${ratio.replace(':','/')} ${style.mj||'--v 6.0'}`;
+    const klingPrompt = isZh
+      ? `${basePrompt}\n${style.mod_zh||style.mod_en}`
+      : `${basePrompt}\n${style.mod_en}`;
+    const claudePrompt = `아래 프롬프트에 "${style.name}" 스타일을 적용해서 ${isZh?'중국어':'영어'} 프롬프트로 만들어줘.\n\n【스타일 설명】${style.mod_ko}\n【원본 프롬프트】${basePrompt}\n【툴】${tool} | 【비율】${ratio}\n\n결과는 프롬프트와 한국어 직역을 함께 보여줘.`;
+
+    card.innerHTML = `
+      <div class="mx-top">
+        <span class="mx-icon">${style.icon}</span>
+        <span class="mx-name">${style.name}</span>
+      </div>
+      <div class="mx-desc">${style.desc}</div>
+      <div class="mx-mod">${style.mod_ko}</div>
+      <div class="mx-btns">
+        <button class="mx-copy-btn mj" onclick="copyMxPrompt(${JSON.stringify(mjPrompt)}, this)">📋 MJ 복사</button>
+        <button class="mx-copy-btn kling" onclick="copyMxPrompt(${JSON.stringify(klingPrompt)}, this)">🀄 Kling 복사</button>
+        <button class="mx-copy-btn" onclick="showCopyModal(${JSON.stringify(claudePrompt)})">✦ Claude</button>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+async function copyMxPrompt(text, btn) {
+  await navigator.clipboard.writeText(text);
+  const orig = btn.textContent;
+  btn.textContent = '✓ 복사됨!';
+  setTimeout(() => { btn.textContent = orig; }, 1800);
+  toast('복사됐어요!', 'ok');
+}
+
+// ═══════════════════════════════════
+//  API KEY
+// ═══════════════════════════════════
+function saveKey() {
+  const v = document.getElementById('apiInp').value.trim();
+  if (!v || v.startsWith('•')) { toast('API 키를 입력해주세요','err'); return; }
+  S.apiKey = v;
+  document.getElementById('apiInp').value = '••••••••••••••';
+  save(); updateApiSt();
+  toast('API 키 저장 ✓','ok');
+}
+function updateApiSt() {
+  const el = document.getElementById('apiSt');
+  el.textContent = S.apiKey ? '✓ 설정됨' : '미설정';
+  el.className = 'api-st ' + (S.apiKey ? 'ok' : 'no');
+}
+
+// ═══════════════════════════════════
+//  PROJECTS
+// ═══════════════════════════════════
+function renderProjects() {
+  const list = document.getElementById('projList');
+  list.innerHTML = '';
+  S.projects.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'proj-item' + (S.activeProjId === p.id ? ' active' : '');
+    el.innerHTML = `<div class="proj-dot"></div><span class="proj-name">${p.name}</span><button class="proj-del" onclick="delProj('${p.id}',event)">×</button>`;
+    el.onclick = () => loadProject(p.id);
+    list.appendChild(el);
+  });
+}
+function openModal() { document.getElementById('modal').classList.add('show'); setTimeout(()=>document.getElementById('projNameInp').focus(),50); }
+function closeModal() { document.getElementById('modal').classList.remove('show'); document.getElementById('projNameInp').value=''; }
+function createProject() {
+  const name = document.getElementById('projNameInp').value.trim();
+  if (!name) { toast('이름을 입력해주세요','err'); return; }
+  const id = 'p_' + Date.now();
+  S.projects.push({ id, name, phrases:{ image:[...DEFAULT_IMG_PHRASES], video:[...DEFAULT_VID_PHRASES] }, inputs:{image:'',video:''}, outputs:{} });
+  save(); closeModal(); renderProjects(); loadProject(id);
+  toast(`"${name}" 생성 ✓`,'ok');
+}
+function delProj(id, e) {
+  e.stopPropagation();
+  const p = S.projects.find(x=>x.id===id);
+  if (!p || !confirm(`"${p.name}" 삭제할까요?`)) return;
+  S.projects = S.projects.filter(x=>x.id!==id);
+  if (S.activeProjId===id) { S.activeProjId=null; document.getElementById('workspace').style.display='none'; document.getElementById('emptyState').style.display='flex'; }
+  save(); renderProjects();
+}
+function loadProject(id) {
+  const p = S.projects.find(x=>x.id===id);
+  if (!p) return;
+  S.activeProjId = id;
+  S.img.selectedPhrases = new Set();
+  S.vid.selectedPhrases = new Set();
+  S.img.moods = new Set(); S.vid.moods = new Set();
+  S.img.selectedAngles = new Set(); S.img.selectedShots = new Set();
+  S.img.camMove = new Set(); S.img.camTex = new Set(); S.img.camFx = new Set();
+  S.vid.camMove = new Set(); S.vid.camTex = new Set(); S.vid.camFx = new Set();
+  S.img.uploadedImgs = [];
+  document.getElementById('emptyState').style.display='none';
+  document.getElementById('workspace').style.display='flex';
+  renderProjects();
+  renderAllControls();
+  renderPhrases('image'); renderPhrases('video');
+  document.getElementById('promptImg').value = p.inputs?.image || '';
+  document.getElementById('promptVid').value = p.inputs?.video || '';
+  document.getElementById('promptImg').oninput = () => { p.inputs.image = document.getElementById('promptImg').value; save(); };
+  document.getElementById('promptVid').oninput = () => { p.inputs.video = document.getElementById('promptVid').value; save(); };
+  document.getElementById('imgPreviews').innerHTML = '';
+  document.getElementById('analysisCard').style.display='none';
+  document.getElementById('outputGridImg').innerHTML = '';
+  document.getElementById('outputGridVid').innerHTML = '';
+  switchCat(S.activeCat);
+}
+function getProj() { return S.projects.find(x=>x.id===S.activeProjId); }
+
+// ═══════════════════════════════════
+//  CAT SWITCH
+// ═══════════════════════════════════
+function switchCat(cat) {
+  S.activeCat = cat;
+  document.getElementById('catImg').className = 'cat-tab' + (cat==='image'?' active':'');
+  document.getElementById('catVid').className = 'cat-tab' + (cat==='video'?' active':'');
+  document.getElementById('paneImage').style.display = cat==='image'?'flex':'none';
+  document.getElementById('paneVideo').style.display = cat==='video'?'flex':'none';
+}
+
+// ═══════════════════════════════════
+//  CONTROL RENDERING
+// ═══════════════════════════════════
+function renderAllControls() {
+  const syncLabel = (curId, val) => { const el=document.getElementById(curId); if(el) el.textContent=val; };
+
+  // 툴/비율/화질 pill 렌더 — 클릭 시 S 업데이트 + 레이블 동기화 + 드롭다운 닫기
+  function makePillRenderer(containerId, items, getVal, setVal, labelId, dropId, btnId, activeClass) {
+    const render = () => {
+      const c = document.getElementById(containerId); if(!c) return;
+      c.innerHTML = '';
+      items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'pill' + (item===getVal() ? ' '+activeClass : '');
+        btn.textContent = item;
+        btn.onclick = () => {
+          setVal(item); save();
+          syncLabel(labelId, item);
+          // close dropdown
+          const drop = document.getElementById(dropId);
+          const dbtn = document.getElementById(btnId);
+          if(drop) drop.style.display='none';
+          if(dbtn) dbtn.classList.remove('open');
+          render(); // re-render pills with updated active
+        };
+        c.appendChild(btn);
+      });
+    };
+    render();
+  }
+
+  makePillRenderer('imgToolPills', IMG_TOOLS, ()=>S.img.tool, v=>{S.img.tool=v;}, 'imgToolCur', 'imgToolDrop', 'imgToolBtn', 'active');
+  makePillRenderer('imgRatioPills', RATIOS, ()=>S.img.ratio, v=>{S.img.ratio=v;}, 'imgRatioCur', 'imgRatioDrop', 'imgRatioBtn', 'active-blue');
+  makePillRenderer('imgQualityPills', IMG_QUALITY, ()=>S.img.quality, v=>{S.img.quality=v;}, 'imgQualityCur', 'imgQualityDrop', 'imgQualityBtn', 'active-yellow');
+  makePillRenderer('vidToolPills', VID_TOOLS, ()=>S.vid.tool, v=>{S.vid.tool=v;}, 'vidToolCur', 'vidToolDrop', 'vidToolBtn', 'active-green');
+  makePillRenderer('vidRatioPills', RATIOS, ()=>S.vid.ratio, v=>{S.vid.ratio=v;}, 'vidRatioCur', 'vidRatioDrop', 'vidRatioBtn', 'active-blue');
+  makePillRenderer('vidQualityPills', VID_QUALITY, ()=>S.vid.quality, v=>{S.vid.quality=v;}, 'vidQualityCur', 'vidQualityDrop', 'vidQualityBtn', 'active-yellow');
+
+  // 초기 레이블 동기화
+  syncLabel('imgToolCur', S.img.tool);
+  syncLabel('imgRatioCur', S.img.ratio);
+  syncLabel('imgQualityCur', S.img.quality);
+  syncLabel('vidToolCur', S.vid.tool);
+  syncLabel('vidRatioCur', S.vid.ratio);
+  syncLabel('vidQualityCur', S.vid.quality);
+
+  // style type + moods
+  renderStyleType('imgStyleTypePills', 'imgMoodGroups', 'image');
+  renderStyleType('vidStyleTypePills', 'vidMoodGroups', 'video');
+  // image angles
+  renderAngleGroups();
+  // camera (video)
+  renderTogglePillsAuto('camMovePills', CAM_MOVE, S.vid.camMove, 'active-green');
+  renderTogglePillsAuto('camTexPills', CAM_TEX, S.vid.camTex, 'active-green');
+  renderTogglePillsAuto('camFxPills', CAM_FX, S.vid.camFx, 'active-green');
+  updateCountUI();
+}
+
+function renderAngleGroups(recSet) {
+  const el = document.getElementById('imgAngleGroups');
+  if (!el) return;
+  el.innerHTML = '';
+  // update hint
+  const hint = document.getElementById('angleHint');
+  if (hint) hint.textContent = recSet?.size > 0 ? `✦ AI 추천 ${recSet.size}개 강조됨` : '';
+
+  Object.entries(IMG_ANGLES).forEach(([groupName, items]) => {
+    const group = document.createElement('div');
+    group.className = 'angle-group';
+    const lbl = document.createElement('div');
+    lbl.className = 'angle-group-lbl';
+    lbl.textContent = groupName;
+    group.appendChild(lbl);
+    const row = document.createElement('div');
+    row.className = 'pill-row';
+    items.forEach(item => {
+      const btn = document.createElement('button');
+      const isSelAngle = S.img.selectedAngles.has(item.l);
+      const isSelShot = S.img.selectedShots.has(item.l);
+      const isSel = isSelAngle || isSelShot;
+      const isRec = recSet?.has(item.l);
+      btn.className = 'pill' + (isSel ? ' active-blue' : '') + (isRec && !isSel ? ' ai-rec' : '');
+      btn.textContent = item.l;
+      if (isRec && !isSel) btn.title = 'AI 추천';
+      btn.onclick = () => {
+        // toggle between angle and shot sets based on group
+        const targetSet = groupName === '카메라 각도' ? S.img.selectedAngles : S.img.selectedShots;
+        if (targetSet.has(item.l)) targetSet.delete(item.l);
+        else { targetSet.add(item.l); }
+        renderAngleGroups(recSet);
+      };
+      row.appendChild(btn);
+    });
+    group.appendChild(row);
+    el.appendChild(group);
+  });
+}
+
+// Auto-aware toggle pills for video camera
+function renderTogglePillsAuto(containerId, items, activeSet, activeClass) {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.innerHTML = '';
+  items.forEach(item => {
+    const isAuto = item.l === 'Auto';
+    const btn = document.createElement('button');
+    btn.className = 'pill' + (isAuto ? ' auto-pill' : '') + (activeSet.has(item.l) ? ' '+activeClass : '');
+    btn.textContent = item.l;
+    btn.onclick = () => {
+      if (isAuto) {
+        // Auto exclusive toggle — clear others
+        if (activeSet.has('Auto')) { activeSet.delete('Auto'); }
+        else { activeSet.clear(); activeSet.add('Auto'); }
+      } else {
+        activeSet.delete('Auto'); // deselect Auto if specific chosen
+        if (activeSet.has(item.l)) activeSet.delete(item.l);
+        else activeSet.add(item.l);
+      }
+      renderTogglePillsAuto(containerId, items, activeSet, activeClass);
+    };
+    c.appendChild(btn);
+  });
+}
+
+function renderStyleType(typePillsId, moodGroupsId, cat) {
+  const typeEl = document.getElementById(typePillsId);
+  if (!typeEl) return;
+  const st = cat === 'image' ? S.img : S.vid;
+  typeEl.innerHTML = '';
+  STYLE_TYPES.forEach(type => {
+    const btn = document.createElement('button');
+    const isAnime = type === '애니메이션';
+    const isActive = st.styleType === type;
+    btn.className = `style-type-btn ${isAnime?'anime':'real'}${isActive?' active':''}`;
+    btn.textContent = isAnime ? '🎌 애니메이션' : '📷 실사';
+    btn.onclick = () => {
+      st.styleType = type;
+      st.moods = new Set(); // 타입 바꾸면 선택 초기화
+      renderStyleType(typePillsId, moodGroupsId, cat);
+    };
+    typeEl.appendChild(btn);
+  });
+  renderMoodGroups(moodGroupsId, cat);
+}
+
+function renderMoodGroups(moodGroupsId, cat) {
+  const el = document.getElementById(moodGroupsId);
+  if (!el) return;
+  const st = cat === 'image' ? S.img : S.vid;
+  const isAnime = st.styleType === '애니메이션';
+  const groups = isAnime ? MOODS_ANIME : MOODS_REAL;
+  const pillActiveClass = isAnime ? 'active-pink' : 'active';
+  el.innerHTML = '';
+  Object.entries(groups).forEach(([groupName, items]) => {
+    const group = document.createElement('div');
+    group.className = 'mood-group';
+    const lbl = document.createElement('div');
+    lbl.className = 'mood-group-lbl';
+    lbl.textContent = groupName;
+    group.appendChild(lbl);
+    const row = document.createElement('div');
+    row.className = 'pill-row';
+    items.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'pill' + (st.moods.has(item) ? ' '+pillActiveClass : '');
+      btn.textContent = item;
+      btn.onclick = () => {
+        if (st.moods.has(item)) st.moods.delete(item);
+        else st.moods.add(item);
+        btn.className = 'pill' + (st.moods.has(item) ? ' '+pillActiveClass : '');
+      };
+      row.appendChild(btn);
+    });
+    group.appendChild(row);
+    el.appendChild(group);
+  });
+}
+
+function renderPills(containerId, items, activeVal, onClick, activeClass='active') {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.innerHTML = '';
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'pill' + (item===activeVal ? ' '+activeClass : '');
+    btn.textContent = item;
+    btn.onclick = () => {
+      if (onClick) onClick(item);
+      // re-render pills
+      c.querySelectorAll('.pill').forEach(b => b.className = 'pill' + (b.textContent===item?' '+activeClass:''));
+    };
+    c.appendChild(btn);
+  });
+}
+
+function renderTogglePills(containerId, items, activeSet, activeClass='active') {
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.innerHTML = '';
+  items.forEach(item => {
+    const btn = document.createElement('button');
+    btn.className = 'pill' + (activeSet.has(item) ? ' '+activeClass : '');
+    btn.textContent = item;
+    btn.onclick = () => {
+      if (activeSet.has(item)) activeSet.delete(item);
+      else activeSet.add(item);
+      btn.className = 'pill' + (activeSet.has(item) ? ' '+activeClass : '');
+    };
+    c.appendChild(btn);
+  });
+}
+
+function updateCountUI() {
+  document.getElementById('imgCountVal').textContent = S.img.count;
+  document.getElementById('vidCountVal').textContent = S.vid.count;
+  document.getElementById('imgCountMinus').disabled = S.img.count <= 1;
+  document.getElementById('imgCountPlus').disabled = S.img.count >= 6;
+  document.getElementById('vidCountMinus').disabled = S.vid.count <= 1;
+  document.getElementById('vidCountPlus').disabled = S.vid.count >= 6;
+}
+
+function changeCount(cat, delta) {
+  if (cat==='image') {
+    S.img.count = Math.min(6, Math.max(1, S.img.count + delta));
+  } else {
+    S.vid.count = Math.min(6, Math.max(1, S.vid.count + delta));
+  }
+  updateCountUI();
+}
+
+// ═══════════════════════════════════
+//  PHRASES
+// ═══════════════════════════════════
+function renderPhrases(cat) {
+  const p = getProj();
+  if (!p) return;
+  const containerId = cat==='image' ? 'phrasesImg' : 'phrasesVid';
+  const selSet = cat==='image' ? S.img.selectedPhrases : S.vid.selectedPhrases;
+  const c = document.getElementById(containerId);
+  if (!c) return;
+  c.innerHTML = '';
+  (p.phrases[cat] || []).forEach((ph, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (selSet.has(i) ? ' sel' : '');
+    chip.innerHTML = `<span class="chip-txt" title="${ph}">${ph}</span><span class="chip-x" onclick="removePhrase('${cat}',${i},event)">×</span>`;
+    chip.onclick = e => { if(!e.target.classList.contains('chip-x')) togglePhrase(cat,i); };
+    c.appendChild(chip);
+  });
+}
+function togglePhrase(cat, idx) {
+  const s = cat==='image' ? S.img.selectedPhrases : S.vid.selectedPhrases;
+  if (s.has(idx)) s.delete(idx); else s.add(idx);
+  renderPhrases(cat);
+}
+function addPhrase(cat) {
+  const inp = document.getElementById(cat==='image'?'phraseInpImg':'phraseInpVid');
+  const v = inp.value.trim(); if (!v) return;
+  const p = getProj(); if (!p) return;
+  p.phrases[cat].push(v); inp.value=''; save(); renderPhrases(cat);
+  toast('문장 저장 ✓','ok');
+}
+function removePhrase(cat, idx, e) {
+  e.stopPropagation();
+  const p = getProj(); if (!p) return;
+  p.phrases[cat].splice(idx,1);
+  const s = cat==='image' ? S.img.selectedPhrases : S.vid.selectedPhrases;
+  const newS = new Set([...s].filter(i=>i!==idx).map(i=>i>idx?i-1:i));
+  if (cat==='image') S.img.selectedPhrases=newS; else S.vid.selectedPhrases=newS;
+  save(); renderPhrases(cat);
+}
+function getSelPhrases(cat) {
+  const p = getProj(); if (!p) return [];
+  const s = cat==='image' ? S.img.selectedPhrases : S.vid.selectedPhrases;
+  return [...s].sort().map(i=>p.phrases[cat][i]).filter(Boolean);
+}
+
+// ═══════════════════════════════════
+//  IMAGE UPLOAD & ANALYSIS
+// ═══════════════════════════════════
+function handleImgUpload(e) {
+  const files = [...e.target.files];
+  files.forEach(f => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      S.img.uploadedImgs.push({ name: f.name, data: ev.target.result });
+      renderImgPreviews();
+      if (S.img.uploadedImgs.length === 1) analyzeImage(ev.target.result);
+    };
+    reader.readAsDataURL(f);
+  });
+}
+function renderImgPreviews() {
+  const c = document.getElementById('imgPreviews');
+  c.innerHTML = '';
+  S.img.uploadedImgs.forEach((img, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'img-thumb';
+    wrap.innerHTML = `<img src="${img.data}" /><button class="rm" onclick="removeImg(${i},event)">×</button>`;
+    c.appendChild(wrap);
+  });
+}
+function removeImg(i, e) {
+  e.stopPropagation();
+  S.img.uploadedImgs.splice(i,1);
+  renderImgPreviews();
+  if (S.img.uploadedImgs.length===0) document.getElementById('analysisCard').style.display='none';
+}
+// ═══════════════════════════════════
+//  COPY MODAL
+// ═══════════════════════════════════
+function showCopyModal(text) {
+  document.getElementById('copyModalText').value = text;
+  document.getElementById('copyModal').classList.add('show');
+  const btn = document.getElementById('bigCopyBtn');
+  btn.textContent = '📋 클립보드에 복사';
+  btn.className = 'big-copy-btn';
+}
+function closeCopyModal() {
+  document.getElementById('copyModal').classList.remove('show');
+}
+async function doCopyToClipboard() {
+  const text = document.getElementById('copyModalText').value;
+  await navigator.clipboard.writeText(text);
+  const btn = document.getElementById('bigCopyBtn');
+  btn.textContent = '✓ 복사됐어요!';
+  btn.className = 'big-copy-btn done';
+  toast('클립보드에 복사됐어요. Claude 채팅창에 붙여넣으세요!', 'ok');
+  setTimeout(() => closeCopyModal(), 1800);
+}
+document.getElementById('copyModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('copyModal')) closeCopyModal();
+});
+
+// ═══════════════════════════════════
+//  IMAGE UPLOAD (Pro 모드 — 분석 지시문 생성)
+// ═══════════════════════════════════
+async function analyzeImage(dataUrl) {
+  document.getElementById('analysisCard').style.display = 'block';
+  const prompt = `아래 이미지를 분석해서 AI 이미지 생성 프롬프트 제작에 활용하는 방법을 알려줘.
+
+다음 내용을 포함해서 답해줘:
+1. 이미지 특징 요약 (분위기, 색감, 구도, 스타일)
+2. 힉스필드/미드저니에서 레퍼런스로 활용하는 팁
+3. 추천 앵글/샷 키워드 (정면 / 클로즈업 / 바스트샷 / 드론샷 등 구체적으로)
+4. 추천 무드/분위기 키워드 3~5개
+5. 실사 / 애니메이션 중 어떤 스타일에 더 가까운지`;
+
+  document.getElementById('analysisBody').textContent = '이미지가 업로드됐어요. 아래 버튼을 눌러 Claude에 분석을 요청하세요.';
+  window._analysisPrompt = prompt;
+  window._analysisImg = dataUrl;
+  document.getElementById('applyAnalysisBtn').style.display = 'inline-flex';
+}
+
+function copyAnalysisPrompt() {
+  if (!window._analysisPrompt) return;
+  showCopyModal(window._analysisPrompt + '\n\n[이미지를 함께 Claude 채팅창에 업로드해서 붙여넣어 주세요]');
+}
+
+function applyAnalysisSuggestions() {
+  copyAnalysisPrompt();
+}
+
+// ═══════════════════════════════════
+//  기획 도우미 (Pro 모드)
+// ═══════════════════════════════════
+function togglePlanner() {
+  const body = document.getElementById('plannerBody');
+  const btn = body.previousElementSibling.querySelector('.plan-toggle-btn');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '닫기 ▴' : '열기 ▾';
+}
+function togglePlannerVid() {
+  const body = document.getElementById('plannerBodyVid');
+  const btn = body.previousElementSibling.querySelector('.plan-toggle-btn');
+  const open = body.style.display === 'none';
+  body.style.display = open ? 'block' : 'none';
+  btn.textContent = open ? '닫기 ▴' : '열기 ▾';
+}
+
+function runPlanner(cat) {
+  const inputId = cat === 'image' ? 'plannerInput' : 'plannerInputVid';
+  const input = document.getElementById(inputId).value.trim();
+  if (!input) { toast('기획 내용을 입력해주세요', 'err'); return; }
+
+  const system = cat === 'image'
+    ? `다음 아이디어를 바탕으로 AI 이미지 제작 방향을 구체적으로 제안해줘:
+① 추천 촬영 구도/앵글 (구체적으로)
+② 추천 분위기/무드 키워드
+③ 배경 및 소품 제안
+④ 조명/색감 방향
+⑤ 힉스필드 또는 미드저니 프롬프트 초안 1개
+
+아이디어: ${input}`
+    : `다음 아이디어를 바탕으로 AI 영상 제작 방향을 구체적으로 제안해줘:
+① 추천 카메라 무빙/질감
+② 추천 분위기/무드 키워드
+③ 장면 구성 제안 (씬 순서)
+④ 효과/편집 방향
+⑤ 클링 또는 Seedance 프롬프트 초안 1개
+
+아이디어: ${input}`;
+
+  showCopyModal(system);
+}
+
+// ═══════════════════════════════════
+//  IMAGE GENERATE (Pro 모드 — 지시문 조합)
+// ═══════════════════════════════════
+function generateImage() {
+  const input = document.getElementById('promptImg').value.trim();
+  const selPhrases = getSelPhrases('image');
+  if (!input && selPhrases.length === 0) { toast('프롬프트를 입력하거나 문장을 선택해주세요', 'err'); return; }
+
+  const fullInput = [...selPhrases, input].filter(Boolean).join('\n');
+  const tool = S.img.tool;
+  const ratio = S.img.ratio;
+  const quality = S.img.quality;
+  const count = S.img.count;
+  const styleType = S.img.styleType;
+  const moods = [...S.img.moods];
+  const isZh = TOOL_LANG[tool] === 'zh';
+  const targetLang = isZh ? '중국어' : '영어';
+
+  const allAngleItems = [...IMG_ANGLES['카메라 각도'], ...IMG_ANGLES['샷 사이즈 / 줌']];
+  const selAngleKO = allAngleItems
+    .filter(x => S.img.selectedAngles.has(x.l) || S.img.selectedShots.has(x.l))
+    .map(x => x.l);
+
+  const isAnime = styleType === '애니메이션';
+  const styleNote = isAnime
+    ? '스타일: 애니메이션/일러스트 (실사 표현 금지)'
+    : '스타일: 실사 사진 (애니 표현 금지)';
+
+  const parts = [
+    `아래 조건에 맞는 AI 이미지 생성 프롬프트를 ${targetLang}로 ${count}개 만들어줘.`,
+    `각 프롬프트는 조금씩 다른 앵글/구도/표현으로 변형해서 제안해줘.`,
+    ``,
+    `【툴】${tool}`,
+    `【비율】${ratio}`,
+    `【화질】${quality}`,
+    `【${styleNote}】`,
+    selAngleKO.length ? `【앵글/샷】${selAngleKO.join(', ')}` : '',
+    moods.length ? `【분위기/무드】${moods.join(', ')}` : '',
+    ``,
+    `【프롬프트 내용】`,
+    fullInput,
+    ``,
+    `각 결과는 "${targetLang} 프롬프트"와 "한국어 직역"을 함께 보여줘.`,
+  ].filter(x => x !== null).join('\n');
+
+  showCopyModal(parts);
+  // render style matrix below
+  renderStyleMatrix('image', fullInput);
+}
+
+// ═══════════════════════════════════
+//  VIDEO GENERATE (Pro 모드 — 지시문 조합)
+// ═══════════════════════════════════
+function generateVideo() {
+  const input = document.getElementById('promptVid').value.trim();
+  const selPhrases = getSelPhrases('video');
+  if (!input && selPhrases.length === 0) { toast('프롬프트를 입력하거나 문장을 선택해주세요', 'err'); return; }
+
+  const fullInput = [...selPhrases, input].filter(Boolean).join('\n');
+  const tool = S.vid.tool;
+  const ratio = S.vid.ratio;
+  const quality = S.vid.quality;
+  const count = S.vid.count;
+  const styleType = S.vid.styleType;
+  const moods = [...S.vid.moods];
+  const isZh = TOOL_LANG[tool] === 'zh';
+  const targetLang = isZh ? '중국어' : '영어';
+
+  const hasAuto = S.vid.camMove.has('Auto') || S.vid.camTex.has('Auto') || S.vid.camFx.has('Auto');
+  const camMoveItems = CAM_MOVE.filter(x => S.vid.camMove.has(x.l) && x.l !== 'Auto').map(x => x.l);
+  const camTexItems = CAM_TEX.filter(x => S.vid.camTex.has(x.l) && x.l !== 'Auto').map(x => x.l);
+  const camFxItems = CAM_FX.filter(x => S.vid.camFx.has(x.l) && x.l !== 'Auto').map(x => x.l);
+
+  const isAnime = styleType === '애니메이션';
+  const styleNote = isAnime
+    ? '스타일: 애니메이션/일러스트 영상 (실사 표현 금지)'
+    : '스타일: 실사 영상 (애니 표현 금지)';
+
+  const parts = [
+    `아래 조건에 맞는 AI 영상 생성 프롬프트를 ${targetLang}로 ${count}개 만들어줘.`,
+    `각 프롬프트는 카메라 앵글, 클로즈업 여부, 시간대 등을 조금씩 다르게 변형해줘.`,
+    ``,
+    `【툴】${tool}`,
+    `【비율】${ratio}`,
+    `【화질】${quality}`,
+    `【${styleNote}】`,
+    hasAuto ? '【카메라/질감/효과】AI가 장면에 맞게 자동 선택' : '',
+    camMoveItems.length ? `【카메라 무빙】${camMoveItems.join(', ')}` : '',
+    camTexItems.length ? `【카메라 질감】${camTexItems.join(', ')}` : '',
+    camFxItems.length ? `【효과】${camFxItems.join(', ')}` : '',
+    moods.length ? `【분위기/무드】${moods.join(', ')}` : '',
+    ``,
+    `【프롬프트 내용】`,
+    fullInput,
+    ``,
+    isZh
+      ? `결과는 중국어 프롬프트 + 한국어 직역을 함께 보여줘. 클링/Seedance에 최적화해줘.`
+      : `결과는 영어 프롬프트 + 한국어 직역을 함께 보여줘. ${tool}에 최적화해줘.`,
+  ].filter(Boolean).join('\n');
+
+  showCopyModal(parts);
+  renderStyleMatrix('video', fullInput);
+}
+// ═══════════════════════════════════
+function makePlaceholderCard(n, total) { return document.createElement('div'); }
+function makeOutputCard(n, total, prompt, korean, langTag, tool, cat, item) { return document.createElement('div'); }
+function regenSingle() {}
+
+async function copyCard(btn) {
+  const body = btn.closest('.out-card').querySelector('.out-body');
+  const text = body.textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.classList.add('copied'); btn.textContent='✓ 복사됨';
+    setTimeout(()=>{ btn.classList.remove('copied'); btn.innerHTML='📋 복사'; },2000);
+  } catch { toast('복사 실패','err'); }
+}
+
+// ═══════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════
+function toast(msg, type='') {
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.className='toast '+type+' show';
+  setTimeout(()=>{ el.className='toast'; },2600);
+}
+
+document.getElementById('modal').addEventListener('click', e => { if(e.target===document.getElementById('modal')) closeModal(); });
+
+init();
+</script>
+</body>
+</html>
